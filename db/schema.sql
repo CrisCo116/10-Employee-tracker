@@ -25,3 +25,5 @@ CREATE TABLE employee (
      manager_id INT,
     PRIMARY KEY (id)
     );
+
+    ALTER TABLE employee ADD COLUMN department_id INT;
