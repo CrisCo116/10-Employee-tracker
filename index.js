@@ -9,6 +9,32 @@ const connection = mysql.createConnection({
   database: 'employee_tracker_db',
 });
 
+// Function to display the main menu
+function mainMenu() {
+  inquirer
+    .prompt([
+      {
+        type: 'list',
+        name: 'action',
+        message: 'What would you like to do?',
+        choices: ['Add Employee', 'Delete Employee', 'Exit'],
+      },
+    ])
+    .then((answer) => {
+      switch (answer.action) {
+        case 'Add Employee':
+          addEmployee();
+          break;
+        case 'Delete Employee':
+          deleteEmployee();
+          break;
+        case 'Exit':
+          connection.end();
+          break;
+      }
+    });
+}
+
 // Connect to the database
 connection.connect((err) => {
   if (err) {
@@ -16,8 +42,8 @@ connection.connect((err) => {
     return;
   }
   console.log('Connected to the database');
-  // Call the function to add an employee
-  addEmployee();
+  // Call the function to display the main menu
+  mainMenu();
 });
 
 // Function to add an employee
@@ -82,9 +108,17 @@ function addEmployee() {
             return;
           }
           console.log('Employee added successfully!');
-          // Close the connection after adding the employee
-          connection.end();
+          // Return to the main menu after adding the employee
+          mainMenu();
         });
       });
   });
+}
+
+// Function to delete an employee
+function deleteEmployee() {
+  // Implement code to delete an employee
+  console.log('Delete Employee functionality will be implemented here.');
+  // After deleting the employee, return to the main menu
+  mainMenu();
 }
