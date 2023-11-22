@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "body-parser": "^1.20.2",
+    "cfonts": "^3.2.0",
     "express": "^4.18.2",
     "inquirer": "^8.2.4",
     "mysql": "^2.18.1",
