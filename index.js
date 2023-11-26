@@ -25,6 +25,7 @@ function mainMenu() {
           'Add Role',
           'View All Departments',
           'Add Department',
+          'View All Employees',
           'Exit',
         ],
       },
@@ -51,6 +52,9 @@ function mainMenu() {
           break;
         case 'Add Department':
           addDepartment();
+          break;
+        case 'View All Employees':
+          viewAllEmployees();
           break;
         case 'Exit':
           connection.end();
@@ -179,40 +183,163 @@ function deleteEmployee() {
 
 // Function to update an employee's role
 function updateEmployeeRole() {
-  // Implement code to update employee role
-  console.log('Update Employee Role functionality will be implemented here.');
-  // After updating the employee role, return to the main menu
-  mainMenu();
+  // Fetch a list of employees from the database
+  connection.query('SELECT id, first_name, last_name FROM employee', (err, employees) => {
+    if (err) {
+      console.error('Error querying database for employees:', err);
+      return mainMenu();
+    }
+
+    const employeeChoices = employees.map((employee) => ({
+      name: `${employee.first_name} ${employee.last_name}`,
+      value: employee.id,
+    }));
+
+    connection.query('SELECT id, title FROM role', (err, roles) => {
+      if (err) {
+        console.error('Error querying database for roles:', err);
+        return mainMenu();
+      }
+
+      const roleChoices = roles.map((role) => ({
+        name: role.title,
+        value: role.id,
+      }));
+
+      inquirer
+        .prompt([
+          {
+            type: 'list',
+            name: 'employeeId',
+            message: 'Select the employee to update:',
+            choices: employeeChoices,
+          },
+          {
+            type: 'list',
+            name: 'newRoleId',
+            message: 'Select the new role for the employee:',
+            choices: roleChoices,
+          },
+        ])
+        .then((answers) => {
+          const { employeeId, newRoleId } = answers;
+          const sql = 'UPDATE employee SET role_id = ? WHERE id = ?';
+
+          connection.query(sql, [newRoleId, employeeId], (err, results) => {
+            if (err) {
+              console.error('Error updating employee role:', err);
+            } else {
+              console.log('Employee role updated successfully!');
+            }
+            mainMenu(); // Return to the main menu
+          });
+        });
+    });
+  });
 }
 
 // Function to view all roles
 function viewAllRoles() {
-  // Implement code to view all roles
-  console.log('View All Roles functionality will be implemented here.');
-  // After viewing all roles, return to the main menu
-  mainMenu();
+  connection.query('SELECT * FROM role', (err, roles) => {
+    if (err) {
+      console.error('Error querying database for roles:', err);
+      return mainMenu();
+    }
+
+    console.log('\nAll Roles:\n');
+    roles.forEach((role) => {
+      console.log(`ID: ${role.id} | Title: ${role.title} | Salary: ${role.salary}`);
+    });
+
+    mainMenu(); // Return to the main menu
+  });
 }
 
 // Function to add a role
 function addRole() {
-  // Implement code to add a role
-  console.log('Add Role functionality will be implemented here.');
-  // After adding a role, return to the main menu
-  mainMenu();
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'title',
+        message: 'Enter the title of the new role:',
+      },
+      {
+        type: 'input',
+        name: 'salary',
+        message: 'Enter the salary for the new role:',
+      },
+    ])
+    .then((answers) => {
+      const sql = 'INSERT INTO role (title, salary) VALUES (?, ?)';
+      const values = [answers.title, answers.salary];
+
+      connection.query(sql, values, (err, results) => {
+        if (err) {
+          console.error('Error adding role to the database:', err);
+        } else {
+          console.log('Role added successfully!');
+        }
+        mainMenu(); // Return to the main menu
+      });
+    });
 }
 
 // Function to view all departments
 function viewAllDepartments() {
-  // Implement code to view all departments
-  console.log('View All Departments functionality will be implemented here.');
-  // After viewing all departments, return to the main menu
-  mainMenu();
+  connection.query('SELECT * FROM department', (err, departments) => {
+    if (err) {
+      console.error('Error querying database for departments:', err);
+      return mainMenu();
+    }
+
+    console.log('\nAll Departments:\n');
+    departments.forEach((department) => {
+      console.log(`ID: ${department.id} | Name: ${department.name}`);
+    });
+
+    mainMenu(); // Return to the main menu
+  });
 }
 
 // Function to add a department
 function addDepartment() {
-  // Implement code to add a department
-  console.log('Add Department functionality will be implemented here.');
-  // After adding a department, return to the main menu
-  mainMenu();
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'name',
+        message: 'Enter the name of the new department:',
+      },
+    ])
+    .then((answers) => {
+      const sql = 'INSERT INTO department (name) VALUES (?)';
+      const values = [answers.name];
+
+      connection.query(sql, values, (err, results) => {
+        if (err) {
+          console.error('Error adding department to the database:', err);
+        } else {
+          console.log('Department added successfully!');
+        }
+        mainMenu(); // Return to the main menu
+      });
+    });
+}
+
+// Function to view all employees
+function viewAllEmployees() {
+  connection.query('SELECT * FROM employee', (err, employees) => {
+    if (err) {
+      console.error('Error querying database for employees:', err);
+      return mainMenu();
+    }
+
+    console.log('\nAll Employees:\n');
+    employees.forEach((employee) => {
+      console.log(`ID: ${employee.id} | Name: ${employee.first_name} ${employee.last_name} | Role ID: ${employee.role_id} | Manager ID: ${employee.manager_id} | Department ID: ${employee.department_id}`);
+    });
+
+    mainMenu(); // Return to the main menu
+  });
 }
